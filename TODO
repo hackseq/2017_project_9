@@ -7,7 +7,10 @@ TODO list:
   - figure out if we need to use any specific data formats/which are most beneficial (i.e. a tibble or data.frame)
   - decide if we want a stylesheet format (like the dummy example), or for the inputs to be provided as character vectors ( i.e. collapse = c("Rank3"), exclude = c("Helianthus", "Entamoebae") )
   - collect lists of tree tips to collapse based on metadata
+  - get node list from list of tips to collapse
+  - prune list based on depth in tree (don't include redundant collapse commands, only supply base node where all children are going to be collapsed)
 3. new functionality
+  - use splitTree function to collapse our tree
   - select nodes to collapse based on tips
   - collapse nodes
   - label collapsed nodes based on shared ranks
