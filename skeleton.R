@@ -21,12 +21,12 @@ rankN <- collapse
 tree_4 <- as(tree, "phylo4") #need phylo4 class to get nodes from tips
 
 #select tree tips
-for (clade in unique(metadata$rankN)) {
-  if (clade %in% cladestoexclude) {
+for (clade in unique(metadata[[rankN]]) {
+  if (clade in cladestoexclude) {
     print(paste0("Excluding clade: ", clade))
   }
   else {
-   tipstocollapse <- metadata$tips[which(metadata$rankN == clade)]
+   tipstocollapse <- metadata[(which(metadata[[rankN]] == clade)),1]
   }
   returnNodes(tipstocollapse, tree4)
 }
