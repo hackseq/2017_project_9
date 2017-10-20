@@ -1,0 +1,3 @@
+#writeup for automatic tree collapser
+
+We are using taxonomic metadata (taxonomy strings) to collapse a phylogenetic tree. The software takes the form of an R function. Inputs are the tree (phylo class), a data frame storing taxonomic information (rows are taxa, columns are taxa ranks), a rank level (as a column name of the data frame) to collapse to, and a character class vector of clades to exclude (optional). Output is a visualization of the tree with specified taxa collapsed. We collapse each section of the tree (tips belonging to unique clades at collapse rank) separately, and recursively, so nodes where all children have been collapsed are themselves collapsed. The unique rank label at the rank of collapse can be applied to successfully collapsed nodes.
