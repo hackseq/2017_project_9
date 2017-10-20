@@ -9,7 +9,6 @@ tree_test_4 <- as(tree_test, "phylo4") #need phylo4 class to get nodes from tips
 plot(tree_test)
 
 
-
 #building code
 
 #read metadata
@@ -17,6 +16,9 @@ plot(tree_test)
 #read tree
 
 #select tree tips
+
+
+
 
 #from tips to nodes
 foreach tip {
@@ -27,12 +29,11 @@ foreach tip {
 foreach node {
   get parent from tree_test$edge[,1] where tree_test$edge[,2] is the child
   flag node for collapse on second appearance, do recursively
+  #collapse splitTree(tree, list(node=NODE, bp=tree$edge.length[which(tree$edge[,2]==nn)]))
   return(listofnodestocollapse)
 }
 
-
-tree_test$edge[tree_test$edge[ ,2] == c("13"), 1]
-
-findMRCA(tree_test, tips=c("t20", "t14"))
 #select nodes and branch positions based on tree tips
 select ancestors of tips, for each ancestor, compare number selected vs number possible, if equal, collapse (set to be collapsed)
+
+splitTree(tree, list(node=NODE, bp=tree$edge.length[which(tree$edge[,2]==nn)]))
