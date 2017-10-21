@@ -13,7 +13,7 @@ exclude <- c("Bivalvia", "Corallinophycidae") #two clades from rank5
 collapse <- c("rank5")
 
 metadata <- metadata[1:100,]
-tree <- drop.tip(tree,tree$tip.label[-match(metadata[,1], tree$tip.label)])
+tree <- drop.tip(tree, tree$tip.label[!tree$tip.label %in% metadata[,1]])
 
 
 #inputs
