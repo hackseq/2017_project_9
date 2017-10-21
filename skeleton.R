@@ -37,9 +37,7 @@ for (clade in unique(metadata[[rankN]])) {
   }
   nodes <- append(nodes, returnNodes(tipstocollapse, tree4)) #generate full node list
   nodes <- collapse.nodes(nodes) #prune nodes to avoid redundant collapse iterations
-  for (node in nodes) {
-    pruned_tree <- pruneTree(tree, node, clade) #prune tree for each node
-  }
+  pruned_tree <- pruneTree(tree, nodes, clade) #prune tree for each node
 }
 
 # return all nodes to collapse
@@ -110,10 +108,13 @@ for (node in listofnodestocollapse) {
 }
 
 # Function to take a tree, collapse a node, and return the new tree
-pruneTree <- function(tree, node, cladeName) {
+pruneTree <- function(tree, nodes, cladeName) {
   # Prune the tree by splitting at the node
-  trees.split <- splitTree(tree, list(node = node, bp = tree$edge.length[which(tree$edge[,2] == node)]))
-  reduced.tree <- trees.split[[1]]
-  reduced.tree$tip.label[node] <- cladeName # Check if this works!
+  reduced.tree <- tree
+  for (node in nodes) {
+    trees.split <- splitTree(reduced.tree, list(node = node, bp = tree$edge.length[which(tree$edge[,2] == node)]))
+    reduced.tree <- trees.split[[1]]
+    reduced.tree$tip.label[node] <- cladeName # Check if this works!
+  }
   return(reduced.tree)
 }
