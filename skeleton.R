@@ -35,7 +35,9 @@ for (clade in unique(metadata[[rankN]])) {
   else {
    tipstocollapse <- append(tipstocollapse, as.character(metadata[which(metadata[[rankN]] == clade),1]))
   }
-  nodes <- append(nodes, returnNodes(tipstocollapse, tree4))
+  nodes <- append(nodes, returnNodes(tipstocollapse, tree4)) #generate full node list
+  nodes <- collapse.nodes(nodes) #prune nodes to avoid redundant collapse iterations
+  #prune tree for each node
 }
 
 # return all nodes to collapse
