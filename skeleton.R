@@ -41,6 +41,40 @@ for (clade in unique(metadata[[rankN]])) {
   nodes <- append(nodes, returnNodes(tipstocollapse, tree4))
 }
 
+# return all nodes to collapse
+collapse <- collapse.nodes(nodes)
+
+# a wrapper for getNode
+gn.wrapper <- function(node_label, tree) {
+  return(as.numeric(getNode(tree, node_label, type = c("tip", missing = c("warn"))[[1]])))
+}
+
+get.ancestor <- function(node, edges) {
+  return(edges[which(edges[,2] == node)][1])
+}
+
+collapse.nodes <- function(nodes) {
+  ancestors <- matrix(, nrow = 0, ncol = 3)
+  for (i in 1:length(nodes)) {
+    node = unlist(nodes[i])
+    anc = get.ancestor(node, tree_test$edge)
+    if (anc %in% ancestors[,1]) {
+      ind <- which(ancestors[,1] == anc)
+      ancestors[ind, 2] <- 1
+      nodes[nodes == node] <- NA
+      nodes[nodes == ancestors[ind, 3]] <- NA
+    }
+    else {
+      ancestors <- rbind(ancestors, c(anc, 0, node))
+    }
+  }
+  nodes <- nodes[!is.na(nodes)]
+  ancestors <- ancestors[which(ancestors[,2] == 1)]
+  if (length(ancestors) == 0)
+    return(nodes)
+  else
+    return(collapse.nodes(c(ancestors,nodes)))
+}
 
 #select nodes and branch positions based on tree tips
 #from tips to nodes
@@ -67,4 +101,3 @@ for (node in listofnodestocollapse) {
   reduced_tree <- splitTree(tree, list(node=node, bp=tree$edge.length[which(tree$edge[,2]==node)]))
   return(reduced_tree)
 }
-
