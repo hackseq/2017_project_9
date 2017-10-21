@@ -16,8 +16,9 @@ metadata <- metadata[1:100,]
 tree <- drop.tip(tree, tree$tip.label[!tree$tip.label %in% metadata[,1]])
 
 #plotting tree
-ggplot(tree, aes(x, y)) + geom_tree() + theme_tree()
+p <- ggtree(tree, layout="circular", branch.length = "none") + ggtitle("Collapsed Tree")
+p+ geom_tiplab(aes(angle=angle),size=3, color="blue", label=metadata[match(tree$tip.label, metadata[,1]), 9])+geom_nodepoint(color="red", alpha=1, size=1)
 
-
-p <- ggtree(tree, layout="circular", branch.length="none") + ggtitle("(Cladogram) circular layout")
-p + geom_tiplab(aes(angle=angle),size=3, color="blue", label=metadata[match(tree$tip.label, metadata[,1]), 9])
+#p+ geom_tiplab(aes(x,y,label=metadata[match(tree$tip.label, metadata[,1]), 9],subset=(abs(angle) < 90), angle=angle,size=3, color="blue", node))+
+#  geom_tiplab(aes(x,y,label=metadata[match(tree$tip.label, metadata[,1]), 9],subset=(abs(angle) >=90), angle=angle+180,size=3, color="blue", node))
+#    geom_nodepoint(color="red", alpha=1, size=1)
