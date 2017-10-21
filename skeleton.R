@@ -106,3 +106,12 @@ for (node in listofnodestocollapse) {
   reduced_tree <- splitTree(tree, list(node=node, bp=tree$edge.length[which(tree$edge[,2]==node)]))
   return(reduced_tree)
 }
+
+# Function to take a tree, collapse a node, and return the new tree
+pruneTree <- function(tree, node, cladeName) {
+  # Prune the tree by splitting at the node
+  trees.split <- splitTree(tree, list(node = node, bp = tree$edge.length[which(tree$edge[,2] == node)]))
+  reduced.tree <- trees.split[[1]]
+  reduced.tree$tip.label[node] <- cladeName # Check if this works!
+  return(reduced.tree)
+}
