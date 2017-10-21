@@ -9,7 +9,7 @@ metadata <- read.delim(file="testing_files/dummy_metadata.txt", sep="\t", header
 #read tree
 tree <- read.tree(file.path("testing_files/", "newick_format_tree.tre"))
 #parameters
-exclude <- c("Bivalvia", "Corallinophycidae") #two clades from rank5
+exclude <- c("Bivalvia", "Embryophyta") #two clades from rank5
 collapse <- c("rank5")
 
 metadata <- metadata[1:100,]
@@ -22,13 +22,16 @@ tree <- tree
 cladestoexclude <- exclude
 rankN <- collapse
 
-
-pruned_tree <- metadataCollapseTree(tree, metadata, "rank5", excludeType = "column", excludeItem = "excludebin")
-
 #dummy example of column exclude input
 metadata$excludebin <- as.numeric(metadata$rank5)
-metadata$excludebin[which(metadata[,6] == cladestoexclude)] <- 1
-metadata$excludebin[which(metadata[,6] != cladestoexclude)] <- 0
+a <- which(as.character(metadata[,6]) == "Bivalvia")
+b <- which(as.character(metadata[,6]) == "Embryophyta")
+c <- c(a,b)
+metadata$excludebin[c] <- 1
+metadata$excludebin[-c] <- 0
+pruned_tree <- metadataCollapseTree(tree, metadata, "rank5", excludeType = "column", excludeItem = "excludebin")
+
+
 
 metadataCollapseTree <- function (tree, metadata, rankN, excludeType, excludeItem) {
   #create exclusion list

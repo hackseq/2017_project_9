@@ -19,5 +19,5 @@ tree <- drop.tip(tree, tree$tip.label[!tree$tip.label %in% metadata[,1]])
 ggplot(tree, aes(x, y)) + geom_tree() + theme_tree()
 
 
-p <- ggtree(tree, layout="circular", branch.length="none") + ggtitle("(Cladogram) circular layout")
-p + geom_tiplab(aes(angle=angle),size=3, color="blue", label=metadata[match(tree$tip.label, metadata[,1]), 9])
+p <- ggtree(pruned_tree) + ggtitle("")
+p + geom_tiplab(size=3, color="blue", label=pruned_tree$tip.label)
