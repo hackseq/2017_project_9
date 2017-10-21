@@ -37,7 +37,9 @@ for (clade in unique(metadata[[rankN]])) {
   }
   nodes <- append(nodes, returnNodes(tipstocollapse, tree4)) #generate full node list
   nodes <- collapse.nodes(nodes) #prune nodes to avoid redundant collapse iterations
-  #prune tree for each node
+  for (node in nodes) {
+    pruned_tree <- pruneTree(tree, node, clade) #prune tree for each node
+  }
 }
 
 # return all nodes to collapse
