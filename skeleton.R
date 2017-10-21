@@ -32,18 +32,20 @@ cladestoexclude <- createExclusionVec(metadata,rankN,excludeType=c("list","col")
 tree4 <- as(tree, "phylo4") #need phylo4 class to get nodes from tips
 
 #select tree tips
-nodes <- c()
-tipstocollapse <- c()
+pruned_tree <- tree
 for (clade in unique(metadata[[rankN]])) {
+  pruned_tree4 <- as(pruned_tree, "phylo4")
+  nodes <- c()
+  tipstocollapse <- c()
   if (clade %in% cladestoexclude) {
     print(paste0("Excluding clade: ", clade))
   }
   else {
     tipstocollapse <- append(tipstocollapse, as.character(metadata[which(metadata[[rankN]] == clade),1]))
   }
-  nodes <- append(nodes, returnNodes(tipstocollapse, tree4)) #generate full node list
-  nodes <- collapse.nodes(nodes, tree$edge) #prune nodes to avoid redundant collapse iterations
-  pruned_tree <- pruneTree(tree, nodes, clade) #prune tree for each node
+  nodes <- append(nodes, returnNodes(tipstocollapse, pruned_tree4)) #generate full node list
+  nodes <- collapse.nodes(nodes, pruned_tree$edge) #prune nodes to avoid redundant collapse iterations
+  pruned_tree <- pruneTree(pruned_tree, nodes, clade) #prune tree for each node
 }
 
 # return all nodes to collapse
@@ -105,11 +107,14 @@ returnNodes <- function(x,y) {
 
 # Function to take a tree, collapse a node, and return the new tree
 pruneTree <- function(tree, nodes, cladeName) {
-  reduced.tree <- tree #assign so we can work with the new object. this gets pruned and re-assigned each iteration of loop below
-  for (node in nodes) { #split tree for each node
+  # Prune the tree by splitting at each node
+  reduced.tree <- tree
+  for (node in nodes) {
+    # Split the tree, cutting at the node we are collapsing
     trees.split <- splitTree(reduced.tree, list(node = node, bp = tree$edge.length[which(tree$edge[,2] == node)]))
     reduced.tree <- trees.split[[1]]
-    reduced.tree$tip.label[node] <- cladeName # Check if this works!
+    # Replace the new "NA" label with the name of the clade
+    reduced.tree$tip.label[which(reduced.tree$tip.label == "NA")] <- cladeName
   }
   return(reduced.tree)
 }
