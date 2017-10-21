@@ -42,7 +42,7 @@ for (clade in unique(metadata[[rankN]])) {
    tipstocollapse <- append(tipstocollapse, as.character(metadata[which(metadata[[rankN]] == clade),1]))
   }
   nodes <- append(nodes, returnNodes(tipstocollapse, tree4)) #generate full node list
-  nodes <- collapse.nodes(nodes) #prune nodes to avoid redundant collapse iterations
+  nodes <- collapse.nodes(nodes, tree$edge) #prune nodes to avoid redundant collapse iterations
   pruned_tree <- pruneTree(tree, nodes, clade) #prune tree for each node
 }
 
@@ -54,13 +54,13 @@ get.ancestor <- function(node, edges) {
   return(edges[which(edges[,2] == node)][1])
 }
 
-collapse.nodes <- function(nodes) {
+collapse.nodes <- function(nodes, edges) {
   # create structure for storing ancestors
   ancestors <- matrix(, nrow = 0, ncol = 3)
   # iterate through nodes
   for (i in 1:length(nodes)) {
     node = unlist(nodes[i])
-    anc = get.ancestor(node, tree_test$edge)
+    anc = get.ancestor(node, edges)
     # if ancestor already in matrix
     if (anc %in% ancestors[,1]) {
       # get ancestor's index
@@ -84,40 +84,29 @@ collapse.nodes <- function(nodes) {
     return(nodes)
   # recursive call on new node list
   else
-    return(collapse.nodes(c(ancestors,nodes)))
+    return(collapse.nodes(c(ancestors,nodes), edges))
 }
 
 #select nodes and branch positions based on tree tips
 #from tips to nodes
 returnNodes <- function(x,y) {
-  z <- c()
+  z <- c() #declare z for storing selected nodes
   for (tip in x) {
-    node <- as.numeric(getNode(y, tip, type = c("tip"), missing = c("OK"))[[1]])
+    node <- as.numeric(getNode(y, tip, type = c("tip"), missing = c("OK"))[[1]]) #find node ID for tree tip
     if (node != "NA") {
-      z <- append(z, node)
+      z <- append(z, node) #store it if it isn't an NA #if they are NAs, they aren't in the tree. possible if metadata and tree don't match
+    }
+    else {
+      print(paste0("tip not in tree: ", tip)) #tell user if their tip isn't in the tree
     }
   }
   return(z)
 }
 
-#eliminate redundancies, we only want to collapse once for each complete clade we are collapsing
-for (node in nodes) {
-  #get parent from tree_test$edge[,1] where tree_test$edge[,2] is the child
-  #flag node for collapse on second appearance, do recursively
-  return(listofnodestocollapse)
-}
-
-#for each node, do the collapsing
-for (node in listofnodestocollapse) {
-  reduced_tree <- splitTree(tree, list(node=node, bp=tree$edge.length[which(tree$edge[,2]==node)]))
-  return(reduced_tree)
-}
-
 # Function to take a tree, collapse a node, and return the new tree
 pruneTree <- function(tree, nodes, cladeName) {
-  # Prune the tree by splitting at the node
-  reduced.tree <- tree
-  for (node in nodes) {
+  reduced.tree <- tree #assign so we can work with the new object. this gets pruned and re-assigned each iteration of loop below
+  for (node in nodes) { #split tree for each node
     trees.split <- splitTree(reduced.tree, list(node = node, bp = tree$edge.length[which(tree$edge[,2] == node)]))
     reduced.tree <- trees.split[[1]]
     reduced.tree$tip.label[node] <- cladeName # Check if this works!
