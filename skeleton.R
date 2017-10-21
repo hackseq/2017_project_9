@@ -36,12 +36,10 @@ for (clade in unique(metadata[[rankN]])) {
     print(paste0("Excluding clade: ", clade))
   }
   else {
-   tipstocollapse <- append(tipstocollapse, metadata[which(metadata[[rankN]] == clade),1])
-   
-   #TODO FIX THIS, THESE TIP LABELS ARE COMING OUT AS INDICES NOT NAMES
+   tipstocollapse <- append(tipstocollapse, as.character(metadata[which(metadata[[rankN]] == clade),1]))
   }
+  nodes <- append(nodes, returnNodes(tipstocollapse, tree4))
 }
-nodes <- returnNodes(tipstocollapse, tree4)
 
 
 #select nodes and branch positions based on tree tips
