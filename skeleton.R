@@ -23,33 +23,36 @@ cladestoexclude <- exclude
 rankN <- collapse
 
 
-# create exclusion list
-cladestoexclude <- createExclusionVec(metadata,rankN,excludeType=c("list","col"), excludeItem=NULL)
+pruned_tree <- metadataCollapseTree(tree, metadata, "rank5", excludeType = "column", excludeItem = "excludebin")
 
+#dummy example of column exclude input
+metadata$excludebin <- as.numeric(metadata$rank5)
+metadata$excludebin[which(metadata[,6] == cladestoexclude)] <- 1
+metadata$excludebin[which(metadata[,6] != cladestoexclude)] <- 0
 
-
-#make phylo4 object
-tree4 <- as(tree, "phylo4") #need phylo4 class to get nodes from tips
-
-#select tree tips
-pruned_tree <- tree
-for (clade in unique(metadata[[rankN]])) {
-  pruned_tree4 <- as(pruned_tree, "phylo4")
-  nodes <- c()
-  tipstocollapse <- c()
-  if (clade %in% cladestoexclude) {
-    print(paste0("Excluding clade: ", clade))
+metadataCollapseTree <- function (tree, metadata, rankN, excludeType, excludeItem) {
+  #create exclusion list
+  cladestoexclude <- createExclusionVec(metadata, rankN, excludeType, excludeItem)
+  #select tree tips
+  pruned_tree <- tree
+  for (clade in unique(metadata[[rankN]])) {
+    pruned_tree4 <- as(pruned_tree, "phylo4")
+    nodes <- c()
+    tipstocollapse <- c()
+    if (clade %in% cladestoexclude) {
+      print(paste0("Excluding clade: ", clade))
+    }
+    else {
+      tipstocollapse <- append(tipstocollapse, as.character(metadata[which(metadata[[rankN]] == clade),1]))
+    }
+    nodes <- append(nodes, returnNodes(tipstocollapse, pruned_tree4)) #generate full node list
+    nodes <- collapse.nodes(nodes, pruned_tree$edge) #prune nodes to avoid redundant collapse iterations
+    pruned_tree <- pruneTree(pruned_tree, nodes, clade) #prune tree for each node
   }
-  else {
-    tipstocollapse <- append(tipstocollapse, as.character(metadata[which(metadata[[rankN]] == clade),1]))
-  }
-  nodes <- append(nodes, returnNodes(tipstocollapse, pruned_tree4)) #generate full node list
-  nodes <- collapse.nodes(nodes, pruned_tree$edge) #prune nodes to avoid redundant collapse iterations
-  pruned_tree <- pruneTree(pruned_tree, nodes, clade) #prune tree for each node
+  return(pruned_tree)
 }
 
-# return all nodes to collapse
-collapse <- collapse.nodes(nodes)
+
 
 # gets ancestor using child node and edge list
 get.ancestor <- function(node, edges) {
@@ -95,7 +98,7 @@ returnNodes <- function(x,y) {
   z <- c() #declare z for storing selected nodes
   for (tip in x) {
     node <- as.numeric(getNode(y, tip, type = c("tip"), missing = c("OK"))[[1]]) #find node ID for tree tip
-    if (node != "NA") {
+    if (!is.na(node)) {
       z <- append(z, node) #store it if it isn't an NA #if they are NAs, they aren't in the tree. possible if metadata and tree don't match
     }
     else {
