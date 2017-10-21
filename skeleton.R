@@ -39,7 +39,7 @@ for (clade in unique(metadata[[rankN]])) {
     print(paste0("Excluding clade: ", clade))
   }
   else {
-   tipstocollapse <- append(tipstocollapse, as.character(metadata[which(metadata[[rankN]] == clade),1]))
+    tipstocollapse <- append(tipstocollapse, as.character(metadata[which(metadata[[rankN]] == clade),1]))
   }
   nodes <- append(nodes, returnNodes(tipstocollapse, tree4)) #generate full node list
   nodes <- collapse.nodes(nodes, tree$edge) #prune nodes to avoid redundant collapse iterations
