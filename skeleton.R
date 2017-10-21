@@ -3,14 +3,11 @@ library(ape)
 library(phytools)
 library(phylobase)
 
-tree_test <- rtree(n = 20) #need phylo class to work with edges as vectors
-#tree_test <- read.tree("/projects/kelp_seagrass_18s/tree/filtered_input_tree.tre")
-
 #prep code
 #read metadata
-metadata <- read.delim(file="/projects/git/2017_project_9/testing_files/dummy_metadata.txt", sep="\t", header=T)
+metadata <- read.delim(file="testing_files/dummy_metadata.txt", sep="\t", header=T)
 #read tree
-tree <- read.tree(file.path("/projects/git/2017_project_9/testing_files/", "newick_format_tree.tre"))
+tree <- read.tree(file.path("testing_files/", "newick_format_tree.tre"))
 #parameters
 exclude <- c("Bivalvia", "Corallinophycidae") #two clades from rank5
 collapse <- c("rank5")
@@ -44,34 +41,40 @@ for (clade in unique(metadata[[rankN]])) {
 # return all nodes to collapse
 collapse <- collapse.nodes(nodes)
 
-# a wrapper for getNode
-gn.wrapper <- function(node_label, tree) {
-  return(as.numeric(getNode(tree, node_label, type = c("tip", missing = c("warn"))[[1]])))
-}
-
+# gets ancestor using child node and edge list
 get.ancestor <- function(node, edges) {
   return(edges[which(edges[,2] == node)][1])
 }
 
 collapse.nodes <- function(nodes) {
+  # create structure for storing ancestors
   ancestors <- matrix(, nrow = 0, ncol = 3)
+  # iterate through nodes
   for (i in 1:length(nodes)) {
     node = unlist(nodes[i])
     anc = get.ancestor(node, tree_test$edge)
+    # if ancestor already in matrix
     if (anc %in% ancestors[,1]) {
+      # get ancestor's index
       ind <- which(ancestors[,1] == anc)
+      # flag to collapse
       ancestors[ind, 2] <- 1
+      # remove its children from nodes
       nodes[nodes == node] <- NA
       nodes[nodes == ancestors[ind, 3]] <- NA
     }
     else {
+      # add new ancestor (don't flag to collapse, remember its child)
       ancestors <- rbind(ancestors, c(anc, 0, node))
     }
   }
   nodes <- nodes[!is.na(nodes)]
+  # get ancestors flagged to collapse
   ancestors <- ancestors[which(ancestors[,2] == 1)]
+  # if we have none, return nodes
   if (length(ancestors) == 0)
     return(nodes)
+  # recursive call on new node list
   else
     return(collapse.nodes(c(ancestors,nodes)))
 }
