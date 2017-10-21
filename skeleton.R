@@ -36,7 +36,7 @@ for (clade in unique(metadata[[rankN]])) {
    tipstocollapse <- append(tipstocollapse, as.character(metadata[which(metadata[[rankN]] == clade),1]))
   }
   nodes <- append(nodes, returnNodes(tipstocollapse, tree4)) #generate full node list
-  nodes <- collapse.nodes(nodes) #prune nodes to avoid redundant collapse iterations
+  nodes <- collapse.nodes(nodes, tree$edge) #prune nodes to avoid redundant collapse iterations
   pruned_tree <- pruneTree(tree, nodes, clade) #prune tree for each node
 }
 
@@ -48,13 +48,13 @@ get.ancestor <- function(node, edges) {
   return(edges[which(edges[,2] == node)][1])
 }
 
-collapse.nodes <- function(nodes) {
+collapse.nodes <- function(nodes, edges) {
   # create structure for storing ancestors
   ancestors <- matrix(, nrow = 0, ncol = 3)
   # iterate through nodes
   for (i in 1:length(nodes)) {
     node = unlist(nodes[i])
-    anc = get.ancestor(node, tree_test$edge)
+    anc = get.ancestor(node, edges)
     # if ancestor already in matrix
     if (anc %in% ancestors[,1]) {
       # get ancestor's index
@@ -78,7 +78,7 @@ collapse.nodes <- function(nodes) {
     return(nodes)
   # recursive call on new node list
   else
-    return(collapse.nodes(c(ancestors,nodes)))
+    return(collapse.nodes(c(ancestors,nodes), edges))
 }
 
 #select nodes and branch positions based on tree tips
