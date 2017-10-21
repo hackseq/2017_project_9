@@ -22,6 +22,12 @@ tree <- tree
 cladestoexclude <- exclude
 rankN <- collapse
 
+
+# create exclusion list
+cladestoexclude <- createExclusionVec(metadata,rankN,excludeType=c("list","col"), excludeItem=NULL)
+
+
+
 #make phylo4 object
 tree4 <- as(tree, "phylo4") #need phylo4 class to get nodes from tips
 
@@ -118,3 +124,46 @@ pruneTree <- function(tree, nodes, cladeName) {
   }
   return(reduced.tree)
 }
+
+
+
+#Function to create vector of clades to exclude at a given rank, 
+#using various optional user input
+createExclusionVec <- function(metadata,collapseAtRank, excludeType=NULL, excludeItem=NULL) {
+  
+  if (excludeType == 'list') { # list of tips
+    if (is.vector(excludeItem)) {
+      print("List of clades given.")
+      cladestoexclude <- excludeItem
+      
+      return(cladestoexclude)
+    } else {
+      #break
+      print("Invalid input. Exclusion type 'list' must be accompanied by a vectorof clade names")
+    }
+    
+  } else if (excludeType == 'col' | excludeType == 'column') { # additional binary column
+    if (is.character(excludeItem)) {
+      # access column with the user specified name
+      excludeBinaryCol <- excludeItem
+      
+      # include only rows user wants to exclude
+      for (index in which(metadata[[excludeBinaryCol]]==1)) {
+        rankN <- collapseAtRank
+        
+        currentClade <- as.character(metadata[[rankN]][index])
+        cladestoexclude <- append(cladestoexclude,currentClade)
+      }
+      
+      return(cladestoexclude)
+    }
+    
+  } else if (is.null(excludeType)) {  # nothing excluded
+    print("No clades provided to exclude.")
+    
+  } else {  # input error
+    #break
+    print("Invalid exclusion method.")
+  }
+  
+} 
