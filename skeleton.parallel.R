@@ -133,7 +133,7 @@ pruneTree <- function(tree, nodes, cladeName) {
     # Each time we prune, node indices get updated. This function matches node
     # IDs from two trees, so we can figure out what the node ID is in our
     # pruned tree
-    node.map <- if(node > length(tree$tip.label)) { matchNodesPara(tree, reduced.tree) } else { matchLabels(tree, reduced.tree) }
+    node.map <- if(node > length(tree$tip.label)) { matchNodesPara(tree, reduced.tree) } else { matchLabelsPara(tree, reduced.tree) }
     node.reduced <- as.numeric(node.map[which(node.map[,1] == node), 2])
     
     # Split the tree, cutting at the node we are collapsing
@@ -147,7 +147,23 @@ pruneTree <- function(tree, nodes, cladeName) {
   return(reduced.tree)
 }
 
-#parallel
+#parallel matchLabels
+matchLabelspara <- function (tr1, tr2) 
+{
+  foo <- function(x, y) if (length(obj <- which(y == x)) > 
+                            0) 
+    obj
+  else NA
+  numCore = detectCores() -1
+  cl = makeCluster(numCores)
+  
+  M <- cbind(1:Ntip(tr1), paraSapply(cl=cl, tr1$tip.label, foo, y = tr2$tip.label))
+  colnames(M) <- c("tr1", "tr2")
+  M
+  stopCluster()
+}
+
+#parallel matchNodes
 matchNodesPara <- function (tr1, tr2, method = c("descendants", "distances"), ...) 
 {
   if (!inherits(tr1, "phylo") || !inherits(tr1, "phylo")) 
@@ -158,7 +174,8 @@ matchNodesPara <- function (tr1, tr2, method = c("descendants", "distances"), ..
   method <- method[1]
   method <- matchType(method, c("descendants", "distances"))
   if (method == "descendants") {
-    numCores = detectCores()-1
+    #initiate cluster
+    numCores = detectCores() -1
     cl <- makeCluster(numCores)
     
     
@@ -168,9 +185,12 @@ matchNodesPara <- function (tr1, tr2, method = c("descendants", "distances"), ..
     names(desc.tr2) <- 1:tr2$Nnode + length(tr2$tip)
     Nodes <- matrix(NA, length(desc.tr1), 2, dimnames = list(NULL, 
                                                              c("tr1", "tr2")))
-    for (i in 1:length(desc.tr1)) {
+    
+    #parallel for loop
+    registerDoParallel(cl)
+    foreach(i = 1:length(desc.tr1) ) %dopar% {
       Nodes[i, 1] <- as.numeric(names(desc.tr1)[i])
-      for (j in 1:length(desc.tr2)) if (all(desc.tr1[[i]] %in% 
+      foreach (j = 1:length(desc.tr2) ) %dopar% if (all(desc.tr1[[i]] %in% 
                                             desc.tr2[[j]]) && all(desc.tr2[[j]] %in% desc.tr1[[i]])) 
         Nodes[i, 2] <- as.numeric(names(desc.tr2)[j])
     }
