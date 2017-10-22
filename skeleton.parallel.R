@@ -165,7 +165,7 @@ matchLabelspara <- function (tr1, tr2)
 }
 
 #parallel matchNodes
-modifiedMatchNodes <- function(tree1, tree2){
+modifiedMatchNodes <- function(tr1, tr2){
   #initiate cluster
   numCores = detectCores() -1
   cl <- makeCluster(numCores)
