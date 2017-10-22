@@ -178,6 +178,12 @@ matchNodesPara <- function (tr1, tr2, method = c("descendants", "distances"), ..
     numCores = detectCores() -1
     cl <- makeCluster(numCores)
     
+    # Load the packages into all slave processes
+    clusterEvalQ(cl=cl, library(ape))
+    clusterEvalQ(cl=cl, library(phytools))
+    clusterEvalQ(cl=cl, library(phylobase))
+    
+    #clusterExport(cl, c("tr1", "tr2"))
     
     desc.tr1 <- paraLapply(cl, 1:tr1$Nnode + length(tr1$tip), function(x) extract.clade(tr1,x)$tip.label)
     names(desc.tr1) <- 1:tr1$Nnode + length(tr1$tip)
@@ -187,10 +193,10 @@ matchNodesPara <- function (tr1, tr2, method = c("descendants", "distances"), ..
                                                              c("tr1", "tr2")))
     
     #parallel for loop
-    registerDoParallel(cl)
-    foreach(i = 1:length(desc.tr1) ) %dopar% {
+    #registerDoParallel(cl)
+    for(i in 1:length(desc.tr1) ){
       Nodes[i, 1] <- as.numeric(names(desc.tr1)[i])
-      foreach (j = 1:length(desc.tr2) ) %dopar% if (all(desc.tr1[[i]] %in% 
+      for(j in 1:length(desc.tr2) )if (all(desc.tr1[[i]] %in% 
                                             desc.tr2[[j]]) && all(desc.tr2[[j]] %in% desc.tr1[[i]])) 
         Nodes[i, 2] <- as.numeric(names(desc.tr2)[j])
     }
