@@ -32,14 +32,20 @@ metadata$excludebin[c] <- 1
 metadata$excludebin[-c] <- 0
 pruned_tree <- metadataCollapseTree(tree, metadata, "rank5", excludeType = "column", excludeItem = "excludebin")
 
-
-
 metadataCollapseTree <- function (tree, metadata, rankN, excludeType, excludeItem) {
+  #throw out metadata that has no assignment at rankN
+  metadata[[rankN]][which(metadata[[rankN]] == "")] <- NA #convert missing to NA
+  metadata[[rankN]][which(metadata[[rankN]] == "NA")] <- NA #convert character NA to NA
+  metadata <- metadata[which(!is.na(metadata[[rankN]])),] #remove rows with NA values
+  #drop tips that don't have that assignment too
+  tree <- drop.tip(tree, tree$tip.label[!tree$tip.label %in% metadata[,1]])
   #create exclusion list
   cladestoexclude <- createExclusionVec(metadata, rankN, excludeType, excludeItem)
   #select tree tips
   pruned_tree <- tree
+  i <- 0
   for (clade in unique(metadata[[rankN]])) {
+    i <-  i + 1
     pruned_tree4 <- as(pruned_tree, "phylo4")
     if (clade %in% cladestoexclude) {
       print(paste0("Excluding clade: ", clade))
@@ -49,6 +55,7 @@ metadataCollapseTree <- function (tree, metadata, rankN, excludeType, excludeIte
     nodes <- returnNodes(tipstocollapse, pruned_tree4) #generate full node list
     nodes <- collapse.nodes(nodes, pruned_tree$edge) #prune nodes to avoid redundant collapse iterations
     pruned_tree <- pruneTree(pruned_tree, nodes, clade) #prune tree for each node
+    print(paste0("finished with clade: ", clade, "(iteration ", i, "of ", length(unique(metadata[[rankN]]))))
   }
   return(pruned_tree)
 }
