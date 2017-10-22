@@ -1,0 +1,9 @@
+Package: metadataCollapseTree
+Title: Collapses tree at specified taxonomic rank
+Version: 0.1
+Authors@R: person("Evan", "Morien", email = "first.last@example.com",
+                  role = c("aut", "cre"))
+Description: Function to collapse a taxonomic tree at a given rank, with options to exclude members of a specific clade.
+Depends: R (>= 3.1.0)
+License: 
+LazyData: true
