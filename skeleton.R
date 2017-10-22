@@ -7,14 +7,15 @@ library(phylobase)
 #read metadata
 metadata <- read.delim(file="testing_files/dummy_metadata.txt", sep="\t", header=T)
 #read tree
-tree <- read.tree(file.path("testing_files/", "newick_format_tree.tre"))
+tree <- read.tree(file.path("testing_files/", "newick_format_tree.no_query.tre"))
 #parameters
 exclude <- c("Bivalvia", "Embryophyta") #two clades from rank5
 collapse <- c("rank5")
 
-metadata <- metadata[1:100,]
+#make sure tree and metadata correspond in their leaves/rows
 tree <- drop.tip(tree, tree$tip.label[!tree$tip.label %in% metadata[,1]])
-
+a <- as.character(tree$tip.label)
+metadata <- metadata[match(a, metadata$taxon_ID),]
 
 #inputs
 metadata <- metadata
