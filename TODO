@@ -15,10 +15,16 @@ TODO list:
   - X collapse nodes
   - X label collapsed nodes based on shared ranks
 4. integration
-  - write wrapper for all of the above
-  - with parameters for different exclusion forms (string vector vs column in metadata)
+  - X write wrapper for all of the above
+  - X with parameters for different exclusion forms (string vector vs column in metadata)
 5. test code!
-6. wish list...
+  - construct test set for more stringent testing
+  - test with that
+  - test with larger dataset (real data)
+6. write documentation
+  - manual page for ?metadataCollapseTree
+  - toy example for users?
+7. wish list...
   - specify the desired labels of the result tree (i.e want original labels, or rank5 labels, or combined tip and rank labels)
   - collapse different taxa by different ranks
   - ???
