@@ -116,8 +116,9 @@ pruneTree <- function(tree, nodes, cladeName) {
     # Each time we prune, node indices get updated. This function matches node
     # IDs from two trees, so we can figure out what the node ID is in our
     # pruned tree
-    node.map <- matchNodes(tree, reduced.tree)
+    node.map <- if(node > length(tree$tip.label)) { matchNodes(tree, reduced.tree) } else { matchLabels(tree, reduced.tree) }
     node.reduced <- as.numeric(node.map[which(node.map[,1] == node), 2])
+    
     # Split the tree, cutting at the node we are collapsing
     trees.split <- splitTree(
       reduced.tree,
