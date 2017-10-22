@@ -40,15 +40,12 @@ metadataCollapseTree <- function (tree, metadata, rankN, excludeType, excludeIte
   pruned_tree <- tree
   for (clade in unique(metadata[[rankN]])) {
     pruned_tree4 <- as(pruned_tree, "phylo4")
-    nodes <- c()
-    tipstocollapse <- c()
     if (clade %in% cladestoexclude) {
       print(paste0("Excluding clade: ", clade))
+      next
     }
-    else {
-      tipstocollapse <- append(tipstocollapse, as.character(metadata[which(metadata[[rankN]] == clade),1]))
-    }
-    nodes <- append(nodes, returnNodes(tipstocollapse, pruned_tree4)) #generate full node list
+    tipstocollapse <- as.character(metadata[which(metadata[[rankN]] == clade),1])
+    nodes <- returnNodes(tipstocollapse, pruned_tree4) #generate full node list
     nodes <- collapse.nodes(nodes, pruned_tree$edge) #prune nodes to avoid redundant collapse iterations
     pruned_tree <- pruneTree(pruned_tree, nodes, clade) #prune tree for each node
   }
@@ -116,8 +113,15 @@ pruneTree <- function(tree, nodes, cladeName) {
   # Prune the tree by splitting at each node
   reduced.tree <- tree
   for (node in nodes) {
+    # Each time we prune, node indices get updated. This function matches node
+    # IDs from two trees, so we can figure out what the node ID is in our
+    # pruned tree
+    node.map <- matchNodes(tree, reduced.tree)
+    node.reduced <- as.numeric(node.map[which(node.map[,1] == node), 2])
     # Split the tree, cutting at the node we are collapsing
-    trees.split <- splitTree(reduced.tree, list(node = node, bp = tree$edge.length[which(tree$edge[,2] == node)]))
+    trees.split <- splitTree(
+      reduced.tree,
+      list(node = node.reduced, bp = reduced.tree$edge.length[which(reduced.tree$edge[,2] == node.reduced)]))
     reduced.tree <- trees.split[[1]]
     # Replace the new "NA" label with the name of the clade
     reduced.tree$tip.label[which(reduced.tree$tip.label == "NA")] <- cladeName
