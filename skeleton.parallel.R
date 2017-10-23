@@ -6,6 +6,8 @@ library(parallel)
 library(doParallel)
 library(ggtree)
 
+#need to install doParallel, doSNOW, doMPI
+
 #prep code
 #read metadata
 metadata <- read.delim(file="./GitHub/2017_project_9/testing_files/dummy_metadata.txt", sep="\t", header=T)
@@ -36,8 +38,8 @@ metadata$excludebin[-c] <- 0
 pruned_tree <- metadataCollapseTree(tree, metadata, "rank5", excludeType = "column", excludeItem = "excludebin")
 
 
-p <- ggtree(pruned_tree) + ggtitle("")
-p + geom_tiplab(size=3, color="blue", label=pruned_tree$tip.label)
+#p <- ggtree(pruned_tree) + ggtitle("")
+#p + geom_tiplab(size=3, color="blue", label=pruned_tree$tip.label)
 
 
 
@@ -188,11 +190,10 @@ modifiedMatchNodes <- function(tr1, tr2){
   registerDoParallel(cl)
   foreach(i = 1:length(desc.tr1)) %dopar% {
     Nodes[i, 1] <- as.numeric(names(desc.tr1)[i])
-    foreach(j= 1:length(desc.tr2) ) %dopar% if (all(desc.tr1[[i]] %in% 
+    for(j in 1:length(desc.tr2) ) if (all(desc.tr1[[i]] %in% 
                                                     desc.tr2[[j]]) && all(desc.tr2[[j]] %in% desc.tr1[[i]])) 
       Nodes[i, 2] <- as.numeric(names(desc.tr2)[j])
   }
-  stopCluster()
   return(Nodes)
 }
 
